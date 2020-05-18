@@ -1,6 +1,7 @@
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
 /// Bloc base state
 /// All states must inherit from [BlocState]
@@ -76,17 +77,24 @@ abstract class InitializableBloc extends BaseBloc {
   Stream<BlocState> mapEventToState(BlocEvent event) async* {
     if (event is _EventInitialize) {
       yield* _initialize();
-      _initialized = true;
-      yield* _postInitialize();
     } else if (initialized) {
       yield* eventToState(event);
     }
   }
 
-  Stream<BlocState> _postInitialize() async* {}
-
-  Stream<BlocState> _initialize();
+  @mustCallSuper
+  Stream<BlocState> _initialize() async* {
+    try {
+      await initialize();
+      _initialized = true;
+      yield StateInitialized();
+    } catch(e, stackTrace) {
+      yield StateError('Failed to initialize bloc', e, stackTrace);
+    }
+  }
 
   Stream<BlocState> eventToState(BlocEvent event);
+
+  Future<void> initialize();
 
 }
