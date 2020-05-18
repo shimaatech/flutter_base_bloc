@@ -57,3 +57,36 @@ abstract class BaseBloc extends Bloc<BlocEvent, BlocState> {
   BlocState get initialState => StateInitial();
 
 }
+
+
+class _EventInitialize extends BlocEvent {}
+
+class StateInitialized extends BlocState {}
+
+abstract class InitializableBloc extends BaseBloc {
+
+  bool _initialized = false;
+  bool get initialized => _initialized;
+
+  InitializableBloc() {
+    add(_EventInitialize());
+  }
+
+  @override
+  Stream<BlocState> mapEventToState(BlocEvent event) async* {
+    if (event is _EventInitialize) {
+      yield* _initialize();
+      _initialized = true;
+      yield* _postInitialize();
+    } else if (initialized) {
+      yield* eventToState(event);
+    }
+  }
+
+  Stream<BlocState> _postInitialize() async* {}
+
+  Stream<BlocState> _initialize();
+
+  Stream<BlocState> eventToState(BlocEvent event);
+
+}
