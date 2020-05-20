@@ -77,6 +77,7 @@ abstract class InitializableBloc extends BaseBloc {
   Stream<BlocState> mapEventToState(BlocEvent event) async* {
     if (event is _EventInitialize) {
       yield* _initialize();
+      yield* postInitialize();
     } else if (initialized) {
       yield* eventToState(event);
     }
@@ -93,8 +94,13 @@ abstract class InitializableBloc extends BaseBloc {
     }
   }
 
+  @protected
+  Stream<BlocState> postInitialize() async* {}
+
+  @protected
   Stream<BlocState> eventToState(BlocEvent event);
 
+  @protected
   Future<void> initialize();
 
 }
